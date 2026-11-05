@@ -19,10 +19,9 @@ const LIST = `@@cpus
   900     1 deploy                0.0  0.0   1000 S    0   1      30 node node app.js
 `;
 
-const MANAGERS = `@@pm2
-[{"name":"api","pm_id":3,"pid":10,"monit":{"memory":1048576,"cpu":2},"pm2_env":{"status":"online","restart_time":1,"pm_uptime":1}}]
-@@supervisor
-web RUNNING pid 5, uptime 0:10:00
+const PM2_APPS = `[{"name":"api","pm_id":3,"pid":10,"monit":{"memory":1048576,"cpu":2},"pm2_env":{"status":"online","restart_time":1,"pm_uptime":1}}]
+`;
+const SUPERVISOR_APPS = `web RUNNING pid 5, uptime 0:10:00
 `;
 
 describe("status", () => {
@@ -163,7 +162,10 @@ describe("signals", () => {
 describe("apps", () => {
   it("lists pm2 and supervisor apps", async () => {
     s = await startServer();
-    s.ssh.replies.push({ match: "@@pm2", stdout: MANAGERS });
+    s.ssh.replies.push(
+      { match: "pm2 jlist", stdout: PM2_APPS },
+      { match: "supervisorctl status", stdout: SUPERVISOR_APPS },
+    );
     const res = await s.request("GET", "/1/apps");
     expect(res.body.pm2).toBe(true);
     expect(res.body.supervisor).toBe(true);
@@ -171,6 +173,20 @@ describe("apps", () => {
       "api",
       "web",
     ]);
+  });
+
+  it("reads pm2 as the login user, never as root", async () => {
+    s = await startServer();
+    s.ssh.replies.push({ match: "pm2 jlist", stdout: PM2_APPS });
+    await s.request("GET", "/1/apps");
+    const call = s.ssh.calls.find((c) => c.stdin.includes("pm2 jlist"))!;
+    expect(call.command).not.toContain("sudo");
+    const logs = await s.request("POST", "/1/logs", {
+      target: { kind: "pm2", key: "api" },
+    });
+    expect(logs.status).toBe(200);
+    const logCall = s.ssh.calls.find((c) => c.stdin.includes("pm2 logs"))!;
+    expect(logCall.command).not.toContain("sudo");
   });
 
   it("restarts a pm2 app as the login user", async () => {
@@ -361,12 +377,10 @@ describe("watch alerts", () => {
 
   it("restarts a downed app by itself, at most three times an hour", async () => {
     s = await startServer();
-    const down = `@@pm2
-[{"name":"api","pm_id":3,"pid":0,"monit":{"memory":0,"cpu":0},"pm2_env":{"status":"errored","restart_time":1}}]
-@@supervisor
+    const down = `[{"name":"api","pm_id":3,"pid":0,"monit":{"memory":0,"cpu":0},"pm2_env":{"status":"errored","restart_time":1}}]
 `;
     const up = down.replace("errored", "online");
-    const reply = { match: "@@pm2", stdout: up };
+    const reply = { match: "pm2 jlist", stdout: up };
     s.ssh.replies.push({ match: "pm2 restart", stdout: "ok\n" }, reply);
     await s.request("POST", "/1/watches", {
       kind: "pm2",

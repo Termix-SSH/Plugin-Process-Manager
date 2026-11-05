@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "tables": {
+    "watches": {
+      "columns": {
+        "id": {
+          "type": "id",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "type": "refUser",
+          "length": 255,
+          "notNull": true
+        },
+        "hostId": {
+          "type": "refHost",
+          "notNull": true
+        },
+        "kind": {
+          "type": "varchar",
+          "length": 20,
+          "notNull": true
+        },
+        "target": {
+          "type": "varchar",
+          "length": 255,
+          "notNull": true
+        },
+        "rule": {
+          "type": "varchar",
+          "length": 20,
+          "notNull": true
+        },
+        "threshold": {
+          "type": "integer",
+          "notNull": true,
+          "defaultValue": 0
+        },
+        "autoRestart": {
+          "type": "boolean",
+          "notNull": true,
+          "defaultValue": false
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "notNull": true,
+          "defaultNow": true
+        }
+      },
+      "indexes": [
+        {
+          "name": "idx_p_process_manager_watches_unique",
+          "columns": [
+            "userId",
+            "hostId",
+            "kind",
+            "target",
+            "rule"
+          ],
+          "unique": true
+        },
+        {
+          "name": "idx_p_process_manager_watches_host",
+          "columns": [
+            "hostId"
+          ]
+        }
+      ]
+    }
+  }
+}

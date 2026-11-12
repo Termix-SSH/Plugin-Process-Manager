@@ -1,0 +1,137 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Termix-SSH/Termix/main/scripts/authz/authz.schema.json",
+  "seed": [],
+  "routes": {
+    "GET /plugin-api/process-manager/:hostId/apps": {
+      "access": "user",
+      "permission": "process-manager.use",
+      "resource": {
+        "kind": "host",
+        "min": "connect"
+      }
+    },
+    "POST /plugin-api/process-manager/:hostId/apps/:manager/:key/:action": {
+      "access": "user",
+      "permission": "process-manager.use",
+      "resource": {
+        "kind": "host",
+        "min": "connect"
+      },
+      "allowed": "any",
+      "note": "Names a manager and key and action on the host, which the test host does not have; host access is still checked"
+    },
+    "POST /plugin-api/process-manager/:hostId/logs": {
+      "access": "user",
+      "permission": "process-manager.use",
+      "resource": {
+        "kind": "host",
+        "min": "connect"
+      }
+    },
+    "GET /plugin-api/process-manager/:hostId/processes": {
+      "access": "user",
+      "permission": "process-manager.use",
+      "resource": {
+        "kind": "host",
+        "min": "connect"
+      }
+    },
+    "GET /plugin-api/process-manager/:hostId/processes/:pid": {
+      "access": "user",
+      "permission": "process-manager.use",
+      "resource": {
+        "kind": "host",
+        "min": "connect"
+      },
+      "allowed": "any",
+      "note": "Names a pid on the host, which the test host does not have; host access is still checked"
+    },
+    "POST /plugin-api/process-manager/:hostId/processes/:pid/renice": {
+      "access": "user",
+      "permission": "process-manager.use",
+      "resource": {
+        "kind": "host",
+        "min": "connect"
+      },
+      "allowed": "any",
+      "note": "Names a pid on the host, which the test host does not have; host access is still checked"
+    },
+    "POST /plugin-api/process-manager/:hostId/processes/:pid/signal": {
+      "access": "user",
+      "permission": "process-manager.use",
+      "resource": {
+        "kind": "host",
+        "min": "connect"
+      },
+      "allowed": "any",
+      "note": "Names a pid on the host, which the test host does not have; host access is still checked"
+    },
+    "GET /plugin-api/process-manager/:hostId/status": {
+      "access": "user",
+      "permission": "process-manager.use",
+      "resource": {
+        "kind": "host",
+        "min": "connect"
+      }
+    },
+    "POST /plugin-api/process-manager/:hostId/supervisor-refresh": {
+      "access": "user",
+      "permission": "process-manager.use",
+      "resource": {
+        "kind": "host",
+        "min": "connect"
+      }
+    },
+    "GET /plugin-api/process-manager/:hostId/watches": {
+      "access": "user",
+      "permission": "process-manager.use",
+      "resource": {
+        "kind": "host",
+        "min": "connect"
+      }
+    },
+    "POST /plugin-api/process-manager/:hostId/watches": {
+      "access": "user",
+      "permission": "process-manager.use",
+      "resource": {
+        "kind": "host",
+        "min": "connect"
+      }
+    },
+    "DELETE /plugin-api/process-manager/:hostId/watches/:id": {
+      "access": "user",
+      "permission": "process-manager.use",
+      "resource": {
+        "kind": "host",
+        "min": "connect"
+      },
+      "destructive": true,
+      "allowed": "any",
+      "note": "Names a id on the host, which the test host does not have; host access is still checked"
+    },
+    "GET /plugin-api/process-manager/watches": {
+      "access": "user",
+      "permission": "process-manager.use"
+    },
+    "WS /plugin-ws/process-manager/follow": {
+      "access": "user",
+      "permission": "process-manager.use",
+      "resource": {
+        "kind": "own",
+        "fixture": "host"
+      },
+      "send": [
+        {
+          "type": "connect",
+          "data": {
+            "hostConfig": {
+              "id": "{{host}}"
+            }
+          }
+        }
+      ],
+      "refuseReply": "Host not found|Authentication required",
+      "note": "The host comes in the connect message and is resolved as the caller"
+    }
+  }
+}

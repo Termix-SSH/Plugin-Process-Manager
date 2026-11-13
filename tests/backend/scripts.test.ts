@@ -111,7 +111,8 @@ describe("scripts are valid shell", () => {
       ]),
     ];
     for (const script of scripts) expect(syntaxOk(script), script).toBe(true);
-  });
+    // One bash per script, which is slow on Windows under load.
+  }, 30_000);
 });
 
 describe("script contents", () => {
